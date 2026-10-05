@@ -82,7 +82,7 @@ ul.note{margin:8px 0 0;padding-left:1.2em;color:var(--sub);font-size:.8rem}
 <p class="asidehd">全連盟共通の設定</p>
 <section>
 <h2>連盟の活動量</h2><p class="scope">撃破数の既定値と、普通ギフトの上限</p>
-<label for="kill">1日1人あたりの撃破数(バトハン集結・暗黒拠点)</label><div class="in"><input type="number" id="kill" min="0" value="8"><span>回/日</span></div>
+<label for="kill">1日1人あたりの撃破数(バトハン集結・暗黒拠点)</label><div class="in"><input type="number" id="kill" min="0" value="5"><span>回/日</span></div>
 <label for="cap">普通ギフトの上限(1日あたり)</label><div class="in"><input type="number" id="cap" min="0" value="1000"><span>個/日</span></div>
 <p class="hint">記録の撃破数が空欄のときに使う値です。普通ギフトの上限は全記録で共通です。</p>
 </section>
@@ -127,7 +127,7 @@ ul.note{margin:8px 0 0;padding-left:1.2em;color:var(--sub);font-size:.8rem}
 
 <div id="recBody" hidden>
 <section>
-<h2>記録</h2><p class="scope">ある時点の連盟の宝のLvとExp(ゲーム画面の表示のまま)と、そのときのアクティブ人数を記録します。1行目は創設日で、累計Expは0です</p>
+<h2>記録</h2><p class="scope">ある時点の連盟の宝のLvとExp(ゲーム画面の表示のまま)と、そのときのアクティブ人数（毎日ギフトを受け取ってる人数）を記録します。1行目は創設日で、累計Expは0です</p>
 <div class="scroll"><table id="recTbl"></table></div>
 <div class="btns"><button type="button" id="recAdd">記録を追加</button></div>
 <p class="hint" id="recHint"></p>
