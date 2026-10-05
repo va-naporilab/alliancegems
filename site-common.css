@@ -1,0 +1,88 @@
+/* site-common.css — メニュー / フッター共通スタイル（元ツールの style.css から抽出） */
+
+/* ===== サイトメニュー（ページ右上） ===== */
+/* body基準の絶対配置。元ツールでは .header { position: relative } 内に置いていたため、
+   body の padding(1rem) 分を足して同じ位置に見えるようにしている */
+.site-menu { position: absolute; top: 1.6rem; right: 1.6rem; z-index: 50; }
+.site-menu-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.375rem;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(6px);
+  color: #f1f5f9;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.site-menu-btn:hover { background: rgba(15, 23, 42, 0.7); }
+.site-menu-icon { font-size: 1.1rem; line-height: 1; }
+.site-menu-panel {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  width: max-content;
+  min-width: 13rem;
+  max-width: min(86vw, 20rem);
+  padding: 0.4rem;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border: 1px solid rgba(59, 130, 246, 0.5);
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 16px rgba(59, 130, 246, 0.3);
+}
+.site-menu-panel[hidden] { display: none; }
+.site-menu-title { padding: 0.25rem 0.6rem 0.4rem; font-size: 0.75rem; font-weight: 600; color: #94a3b8; }
+.site-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.6rem;
+  border-radius: 0.375rem;
+  color: #e2e8f0;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+a.site-menu-item:hover { background: rgba(37, 99, 235, 0.35); }
+.site-menu-item.current { color: #fde047; background: rgba(250, 204, 21, 0.08); }
+.site-menu-item.disabled { color: #64748b; cursor: default; }
+.site-menu-tag { font-size: 0.7rem; font-weight: 600; color: #94a3b8; white-space: nowrap; }
+.site-menu-item.current .site-menu-tag { color: #fde047; }
+
+@media (max-width: 640px) {
+  /* スマホ：ボタンはアイコンのみ */
+  .site-menu-btn-label { display: none; }
+  .site-menu-btn { padding: 0.35rem 0.6rem; }
+}
+
+/* ===== フッター（クレジット・注意書き） ===== */
+.site-footer-wrap { max-width: 1400px; margin: 0 auto; }
+.site-footer {
+  margin-top: 2rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid rgba(59, 130, 246, 0.3);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.8rem;
+  line-height: 1.7;
+  color: #94a3b8;
+  text-align: center;
+}
+.site-footer p { white-space: pre-line; }
+.site-footer p + p { margin-top: 0.4rem; }
+.site-footer a { color: #93c5fd; text-decoration: underline; }
+.footer-notice {
+  display: inline-block;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  border-radius: 0.375rem;
+  background: rgba(251, 191, 36, 0.06);
+  color: #fcd34d;
+}
+.footer-copyright { color: #64748b; font-size: 0.75rem; }

@@ -2,13 +2,15 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
+<link rel="stylesheet" href="site-common.css">
+<script src="site-common.js" defer></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>連盟ダイヤ推定ツール</title>
 <style>
-:root{--bg:#f3f5f2;--panel:#fff;--ink:#1d2a26;--sub:#5d6b66;--line:#d5dcd8;--acc:#0f6b5c;--acc2:#b4521f;--warn:#8a5a00;--warnbg:#fff4d6;
+:root{--bg:#f3f5f2;--panel:#fff;--ink:#1d2a26;--sub:#5d6b66;--line:#d5dcd8;--acc:#0f6b5c;--acc2:#b4521f;--warn:#8a5a00;--warnbg:#fff4d6;--onacc:#fff;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121815;--panel:#1b2420;--ink:#e6ede9;--sub:#9db0a8;--line:#2e3b36;--acc:#4fc3ad;--acc2:#f09a68;--warn:#f2c76a;--warnbg:#3a3116}}
-:root[data-theme="dark"]{--bg:#121815;--panel:#1b2420;--ink:#e6ede9;--sub:#9db0a8;--line:#2e3b36;--acc:#4fc3ad;--acc2:#f09a68;--warn:#f2c76a;--warnbg:#3a3116}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121815;--panel:#1b2420;--ink:#e6ede9;--sub:#9db0a8;--line:#2e3b36;--acc:#4fc3ad;--acc2:#f09a68;--warn:#f2c76a;--warnbg:#3a3116;--onacc:#0b1512}}
+:root[data-theme="dark"]{--bg:#121815;--panel:#1b2420;--ink:#e6ede9;--sub:#9db0a8;--line:#2e3b36;--acc:#4fc3ad;--acc2:#f09a68;--warn:#f2c76a;--warnbg:#3a3116;--onacc:#0b1512}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif;line-height:1.6}
@@ -18,14 +20,19 @@ h2{font-size:1rem;margin:0 0 4px}
 p.lead{margin:0 0 16px;color:var(--sub);font-size:.9rem}
 .layout{display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start}
 @media (max-width:820px){.layout{grid-template-columns:1fr}}
-@media (min-width:821px){aside{position:sticky;top:12px}}
+@media (min-width:821px){aside{position:sticky;top:12px;max-height:calc(100dvh - 24px);overflow-y:auto;padding:2px}}
+.asidehd{margin:0 0 8px;font-size:.85rem;font-weight:700;color:var(--sub)}
+.pop{border-top:1px solid var(--line);margin-top:10px}
+#hRen:empty{display:none}
 section,.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}
 .scope{font-size:.78rem;color:var(--sub);margin:0 0 10px}
 label{display:block;font-size:.82rem;color:var(--sub);margin-top:8px}
 .in{display:flex;align-items:center;gap:6px;margin-top:2px}
+.in button{flex:none;white-space:nowrap}
 .in span{color:var(--sub);font-size:.85rem;min-width:1.6em}
-input{width:100%;padding:8px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px}
-input:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+input,select,textarea{width:100%;padding:8px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px}
+textarea{font-size:.8rem;resize:vertical}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
 .hint{font-size:.78rem;color:var(--sub);margin:4px 0 0;min-height:1.2em}
 .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
 .c{border-left:3px solid var(--line);padding-left:10px}
@@ -46,40 +53,38 @@ th,td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:right;white
 th:first-child,td:first-child{text-align:left;white-space:normal}
 td:nth-child(2){color:var(--sub);font-size:.78rem;text-align:left}
 td input{padding:4px 6px;min-width:96px;text-align:right}
-#tbl td:nth-child(2){text-align:right;color:inherit;font-size:inherit}
-#tiers td:nth-child(2){text-align:right;color:inherit;font-size:inherit}
+#tbl td:nth-child(2),#tiers td:nth-child(2),#recTbl td:nth-child(2),#rTbl td:nth-child(2){text-align:right;color:inherit;font-size:inherit}
+#recTbl td input[type="date"]{min-width:140px;text-align:left}
+#recTbl td:last-child{text-align:center}
+#recTbl td.tag{color:var(--sub);font-size:.8rem}
+#recTbl tr.fd td{background:color-mix(in srgb,var(--acc) 8%,transparent)}
+#rTbl td:first-child{white-space:nowrap}
+#rTbl tr.dim td{opacity:.45}
 .mix{display:grid;grid-template-columns:repeat(2,1fr);gap:4px 10px}
 .mix label{margin-top:4px;font-size:.78rem}
 button{font:inherit;padding:6px 12px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}
+.rowbtn{padding:3px 8px;font-size:.8rem}
+.sep{border-top:1px solid var(--line);margin:14px 0 0}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
 details{margin-top:8px}
 summary{cursor:pointer;color:var(--sub);font-size:.9rem}
 ul.note{margin:8px 0 0;padding-left:1.2em;color:var(--sub);font-size:.8rem}
+@media (max-width:820px){aside{order:2}}
 </style>
 </head>
 <body>
 <main>
 <h1>連盟ダイヤ推定ツール</h1>
-<p class="lead">連盟の累計Expから、連盟員1人が受け取ったダイヤと、連盟の課金額を推定します。</p>
+<p class="lead">連盟の宝のLvとExpの記録から、連盟員1人が受け取ったダイヤと、連盟の総課金額を推定します。</p>
 <div class="layout">
 <aside>
+<p class="asidehd">全連盟共通の設定</p>
 <section>
-<h2>期間</h2><p class="scope">連盟がギフトを受け取ってきた期間</p>
-<label for="start">創設日</label><div class="in"><input type="date" id="start"></div>
-<label for="end">集計日</label><div class="in"><input type="date" id="end"></div>
-<p class="hint" id="hDays"></p>
-</section>
-<section>
-<h2>連盟の宝の現在地</h2><p class="scope">ゲーム画面の表示をそのまま入力</p>
-<label for="lv">現在のレベル</label><div class="in"><input type="number" id="lv" min="1" value="10"><span>Lv</span></div>
-<label for="exp">現在レベルで貯まっているExp</label><div class="in"><input type="number" id="exp" min="0" step="0.01" value="0"><span>M</span></div>
-<p class="hint" id="hLv"></p>
-</section>
-<section>
-<h2>連盟の活動量</h2><p class="scope">期間中の平均</p>
-<label for="mem">連盟規模</label><div class="in"><input type="number" id="mem" min="1" value="120"><span>人</span></div>
+<h2>連盟の活動量</h2><p class="scope">撃破数の既定値と、普通ギフトの上限</p>
 <label for="kill">1日1人あたりの撃破数(バトハン集結・暗黒拠点)</label><div class="in"><input type="number" id="kill" min="0" value="8"><span>回/日</span></div>
 <label for="cap">普通ギフトの上限(1日あたり)</label><div class="in"><input type="number" id="cap" min="0" value="1000"><span>個/日</span></div>
-<p class="hint" id="hNorm"></p>
+<p class="hint">記録の撃破数が空欄のときに使う値です。普通ギフトの上限は全記録で共通です。</p>
 </section>
 <section>
 <h2>レアギフトの購入比率</h2><p class="scope">価格帯ごとの購入回数の比(低価格から)</p>
@@ -94,49 +99,144 @@ ul.note{margin:8px 0 0;padding-left:1.2em;color:var(--sub);font-size:.8rem}
 </aside>
 
 <div>
-<div id="warns"></div>
-<div class="row hero card" id="hero"></div>
 <section>
-<h2>連盟員1人が受け取ったダイヤ</h2><p class="scope">期間中の合計と、1日あたり</p>
-<div class="row" id="dia"></div>
-<div class="bar" id="bar"></div><div class="legend" id="legend"></div>
+<h2>連盟</h2><p class="scope">連盟ごとに記録を保存します(このブラウザのローカルストレージ)</p>
+<div id="allyManage" hidden>
+<div class="in"><select id="allySel" aria-label="登録済みの連盟"></select></div>
+<div class="btns"><button type="button" id="allyRenBtn" aria-expanded="false">名前を変更</button><button type="button" id="allyAddBtn" aria-expanded="false">新しい連盟を追加</button><button type="button" id="allyDel">この連盟を削除</button></div>
+</div>
+<div id="renForm" class="pop" hidden>
+<label for="allyName">新しい連盟名</label>
+<div class="in"><input type="text" id="allyName" autocomplete="off"><button type="button" id="allyRen" disabled>変更</button><button type="button" id="renCancel">やめる</button></div>
+</div>
+<div id="addForm" class="pop" hidden>
+<label for="newName">追加する連盟の名前</label>
+<div class="in"><input type="text" id="newName" placeholder="連盟名" autocomplete="off"><button type="button" id="allyAdd">登録</button><button type="button" id="addCancel">やめる</button></div>
+</div>
+<p class="hint" id="hRen"></p>
+<p class="hint" id="noAlly">連盟を登録すると、創設日の設定から始められます。</p>
+</section>
+
+<section id="foundCard" hidden>
+<h2>創設日を設定</h2><p class="scope">まず連盟ができた日を入力してください。この日を累計Exp 0(連盟の宝Lv1・Exp 0)の起点にして、あとの記録と結びつけます</p>
+<label for="fdIn">創設日</label><div class="in"><input type="date" id="fdIn"></div>
+<label for="fmIn">創設時のアクティブ人数(任意)</label><div class="in"><input type="number" id="fmIn" min="1" step="1"><span>人</span></div>
+<p class="hint">空欄のときは、最初の記録の人数を使います。</p>
+<div class="btns"><button type="button" id="fdSet" disabled>創設日を設定</button></div>
+</section>
+
+<div id="recBody" hidden>
+<section>
+<h2>記録</h2><p class="scope">ある時点の連盟の宝のLvとExp(ゲーム画面の表示のまま)と、そのときのアクティブ人数を記録します。1行目は創設日で、累計Expは0です</p>
+<div class="scroll"><table id="recTbl"></table></div>
+<div class="btns"><button type="button" id="recAdd">記録を追加</button></div>
+<p class="hint" id="recHint"></p>
 </section>
 <section>
-<h2>Expの内訳</h2><p class="scope">受け取りのたびにExpが増えるため、連盟全体のExpは「ギフト1個分 × 受け取った人数」になります</p>
-<div class="scroll"><table id="flow"></table></div>
+<h2>推定する期間</h2><p class="scope">記録の日付から選ぶか、日付を指定します。指定した日が記録と記録のあいだにあるときは、前後の記録を直線で結んで推定します</p>
+<div class="row">
+<div><label for="pfSel">開始日</label><div class="in"><select id="pfSel"></select></div><div class="in"><input type="date" id="pf" hidden aria-label="開始日を指定"></div></div>
+<div><label for="ptSel">終了日</label><div class="in"><select id="ptSel"></select></div><div class="in"><input type="date" id="pt" hidden aria-label="終了日を指定"></div></div>
+</div>
+<div class="btns"><button type="button" id="pAll">全期間にする</button></div>
+<p class="hint" id="hPeriod"></p>
 </section>
-<details class="card"><summary>レベル別の連盟の宝(連盟員1人あたり)</summary><div class="scroll"><table id="detail"></table></div></details>
-<details class="card"><summary>連盟の宝のデータ表(編集できます)</summary>
+<div id="rWarns"></div>
+<div class="row hero card" id="rHero"></div>
+<section>
+<h2>連盟員1人が受け取ったダイヤ</h2><p class="scope">推定期間の合計と、1日あたり</p>
+<div class="row" id="rDia"></div>
+<div class="bar" id="rBar"></div><div class="legend" id="rLegend"></div>
+</section>
+<section>
+<h2>区間ごとの内訳</h2><p class="scope">記録と記録のあいだを1区間として計算し、推定期間に含まれる日数の分だけ表示しています。Exp・ダイヤは区間内で毎日同じペースで増えたものとして日割りします</p>
+<div class="scroll"><table id="rTbl"></table></div>
+</section>
+</div>
+<details class="card" id="bkBox"><summary>バックアップ(書き出し・読み込み)</summary>
+<p class="scope">ローカルストレージはこのブラウザにだけ保存されます。別の端末へ移すときや、念のための控えに使えます</p>
+<textarea id="bk" rows="5" aria-label="バックアップ用のテキスト" spellcheck="false"></textarea>
+<div class="btns"><button type="button" id="bkOut">書き出す</button><button type="button" id="bkIn">この内容で置き換える</button></div>
+<p class="hint" id="hBk"></p>
+</details>
+
+<details class="card"><summary>連盟の宝のデータ表(全連盟共通・編集できます)</summary>
 <div class="scroll"><table id="tbl"></table></div>
 <p><button id="add" type="button">レベルを追加</button></p></details>
+<details class="card"><summary>計算の前提</summary>
 <ul class="note">
-<li>Lv1〜17 は vividarmy.net、Lv18〜23 は提供データです。カギとExpは 1:1 で貯まり、開封回数は「そのレベルで増えたExp ÷ 開封カギpt」で求めています。</li>
+<li>連盟の宝のLv1〜17 は vividarmy.net、Lv18〜23 は提供データです。カギとExpは 1:1 で貯まり、開封回数は「そのレベルで増えたExp ÷ 開封カギpt」で求めています。</li>
 <li>普通ギフトは ダイヤなし・Expとカギが3ずつ。1日の個数は「人数×撃破数」を上限で頭打ちにし、全員が受け取るものとして計算しています。</li>
 <li>レアギフトのダイヤ還元率と円/Expは、購入比率で重み付けした平均です。改定日は「それ以降」として新価格に含めます。</li>
-</ul>
+<li>創設日は累計Exp 0(連盟の宝Lv1・Exp 0)の記録として扱います。創設日のアクティブ人数は空欄でもよく、その場合は最初の記録の人数を使います。</li>
+<li>記録と記録のあいだ(区間)ごとに、人数と撃破数は両端の記録の平均値を使います。連盟の宝のダイヤは、区間の両端の累計Expから求めた差です。</li>
+<li>推定期間が区間の途中から始まる・終わる場合は、その区間のExp・ダイヤを日数の割合で按分します。記録のない期間は推定できません。</li>
+</ul></details>
 </div>
 </div>
 </main>
 <script>
 const DATA=[[1500000,450000,75],[2250000,525000,85],[3150000,600000,100],[4200000,675000,115],[5400000,750000,130],[6750000,825000,145],[8250000,900000,160],[10500000,975000,175],[12600000,1050000,190],[15000000,1500000,275],[18000000,1650000,305],[22500000,1800000,335],[28500000,1950000,365],[36000000,2100000,395],[45000000,2250000,430],[57000000,2400000,460],[75000000,2550000,495],[97500000,2700000,525],[123000000,2850000,560],[130000000,3300000,655],[180000000,3600000,720],[218000000,3900000,780],[263000000,4200000,850],[null,null,null]];
+const TIERS=[[160,120,5,20,5],[320,240,5,40,3],[650,600,10,100,2],[1300,1100,10,200,2],[2700,2440,10,450,2],[7000,6100,20,1200,1],[13900,12000,20,2400,1]];
+const KEY='allianceDiaTool.v1';
+const FD='__fd';
 const $=id=>document.getElementById(id);
 const fmtD=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const utc=s=>{const [y,m,d]=s.split('-').map(Number);return Date.UTC(y,m-1,d)};
+const fmtU=t=>new Date(t).toISOString().slice(0,10);
 const n0=x=>Math.round(x).toLocaleString('ja-JP');
 const n1=x=>x.toLocaleString('ja-JP',{maximumFractionDigits:1});
 const n2=x=>x.toLocaleString('ja-JP',{maximumFractionDigits:2});
-const now=new Date();
-$('end').value=fmtD(now);
-$('start').value=fmtD(new Date(now.getFullYear()-2,now.getMonth(),now.getDate()));
+const n4=x=>x.toLocaleString('ja-JP',{maximumFractionDigits:4});
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const numOrNull=v=>(v===null||v===undefined||v===''||!Number.isFinite(Number(v)))?null:Number(v);
+const isDate=s=>typeof s==='string'&&/^\d{4}-\d\d-\d\d$/.test(s);
+const card=(k,v,s,cls)=>`<div class="c ${cls||''}"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s||''}</div></div>`;
+
+/* ---------- 保存データ ---------- */
+let S={cur:null,allies:[],cfg:null};
+let ready=false;
+const cleanAlly=a=>({id:String(a&&a.id||uid()),name:String(a&&a.name||''),
+  fd:isDate(a&&a.fd)?a.fd:'',fm:numOrNull(a&&a.fm),fk:numOrNull(a&&a.fk),
+  pf:isDate(a&&a.pf)?a.pf:'',pt:isDate(a&&a.pt)?a.pt:'',pfc:!!(a&&a.pfc),ptc:!!(a&&a.ptc),
+  recs:(a&&Array.isArray(a.recs)?a.recs:[]).map(r=>({id:String(r&&r.id||uid()),date:isDate(r&&r.date)?r.date:'',lv:numOrNull(r&&r.lv),exp:numOrNull(r&&r.exp),mem:numOrNull(r&&r.mem),kill:numOrNull(r&&r.kill)}))});
+function load(){
+  try{
+    const s=JSON.parse(localStorage.getItem(KEY)||'null');
+    if(s&&typeof s==='object'){
+      S.allies=Array.isArray(s.allies)?s.allies.map(cleanAlly):[];
+      S.cur=S.allies.some(a=>a.id===s.cur)?s.cur:(S.allies[0]?S.allies[0].id:null);
+      S.cfg=s.cfg&&typeof s.cfg==='object'?s.cfg:null;
+    }
+  }catch(e){}
+}
+function cfgNow(){
+  return{kill:$('kill').value,cap:$('cap').value,cut:$('cut').value,data:rows(),
+    tiers:[...document.querySelectorAll('#tiers tr')].slice(1).map(tr=>[...tr.querySelectorAll('input')].map(x=>x.value)),
+    w:[...document.querySelectorAll('#mix input')].map(x=>x.value)};
+}
+function save(){
+  if(ready)S.cfg=cfgNow();
+  try{localStorage.setItem(KEY,JSON.stringify({cur:S.cur,allies:S.allies,cfg:S.cfg}))}catch(e){}
+}
+function applyCfg(c){
+  if(!c)return;
+  if(Array.isArray(c.data)&&c.data.length&&c.data.every(r=>Array.isArray(r)&&r.length===3)){DATA.length=0;c.data.forEach(r=>DATA.push(r.map(numOrNull)))}
+  if(Array.isArray(c.tiers)&&c.tiers.length===TIERS.length)c.tiers.forEach((t,i)=>{for(let j=0;j<4;j++){const v=numOrNull(t&&t[j]);if(v!=null)TIERS[i][j]=v}});
+  if(Array.isArray(c.w)&&c.w.length===TIERS.length)c.w.forEach((v,i)=>{const x=numOrNull(v);if(x!=null)TIERS[i][4]=x});
+  ['kill','cap'].forEach(k=>{if(numOrNull(c[k])!=null)$(k).value=c[k]});
+  if(isDate(c.cut))$('cut').value=c.cut;
+}
+const cur=()=>S.allies.find(a=>a.id===S.cur)||null;
+
+/* ---------- 共通の表 ---------- */
 function buildTable(){
-  let h='<tr><th>Lv</th><th>次Lv Exp</th><th>開封カギpt</th><th>ダイヤ(♦)</th></tr>';
-  DATA.forEach((r,i)=>{h+=`<tr><td>${i+1}</td>`+r.map((v,j)=>`<td><input type="number" min="0" data-r="${i}" data-c="${j}" value="${v??''}" aria-label="Lv${i+1}の${['次Lv Exp','開封カギpt','ダイヤ'][j]}"></td>`).join('')+'</tr>'});
+  let h='<tr><th>連盟の宝のLv</th><th>次Lv Exp</th><th>開封カギpt</th><th>ダイヤ(♦)</th></tr>';
+  DATA.forEach((r,i)=>{h+=`<tr><td>${i+1}</td>`+r.map((v,j)=>`<td><input type="number" min="0" data-r="${i}" data-c="${j}" value="${v??''}" aria-label="連盟の宝Lv${i+1}の${['次Lv Exp','開封カギpt','ダイヤ'][j]}"></td>`).join('')+'</tr>'});
   $('tbl').innerHTML=h;
 }
 function rows(){const o=[];document.querySelectorAll('#tbl tr').forEach((tr,i)=>{if(i)o.push([...tr.querySelectorAll('input')].map(x=>x.value===''?null:Number(x.value)))});return o}
-const card=(k,v,s,cls)=>`<div class="c ${cls||''}"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s||''}</div></div>`;
-const TIERS=[[160,120,5,20,5],[320,240,5,40,3],[650,600,10,100,2],[1300,1100,10,200,2],[2700,2440,10,450,2],[7000,6100,20,1200,1],[13900,12000,20,2400,1]];
-const n4=x=>x.toLocaleString('ja-JP',{maximumFractionDigits:4});
 function buildTiers(){
   let h='<tr><th>新価格(円)</th><th>旧価格(円)</th><th>ダイヤ</th><th>Exp・カギ</th></tr>';
   TIERS.forEach((t,i)=>{h+='<tr>'+t.slice(0,4).map((v,j)=>`<td><input type="number" min="0" data-t="${i}" data-j="${j}" value="${v}" aria-label="${i+1}段目の${['新価格','旧価格','ダイヤ','Exp・カギ'][j]}"></td>`).join('')+'</tr>'});
@@ -148,63 +248,298 @@ function tiers(){
   const w=[...document.querySelectorAll('#mix input')].map(x=>Math.max(0,Number(x.value)||0));
   return T.map((t,i)=>({np:t[0],op:t[1],d:t[2],x:t[3],w:w[i]}));
 }
-function calc(){
-  const R=rows(),L=Math.max(1,parseInt($('lv').value)||1),e=Math.max(0,Number($('exp').value)||0)*1e6;
-  const mem=Math.max(1,Number($('mem').value)||1),kill=Math.max(0,Number($('kill').value)||0),cap=Math.max(0,Number($('cap').value)||0);
-  const s=utc($('start').value),t=utc($('end').value),c=utc($('cut').value);
+function common(){
   const T=tiers();
   T.forEach((x,i)=>{$('mx'+i).textContent=n0(x.np)+'円'});
   const sw=T.reduce((a,x)=>a+x.w,0),wX=T.reduce((a,x)=>a+x.w*x.x,0),wD=T.reduce((a,x)=>a+x.w*x.d,0);
   const wN=T.reduce((a,x)=>a+x.w*x.np,0),wO=T.reduce((a,x)=>a+x.w*x.op,0);
   const dpe=wX>0?wD/wX:0,yN=wX>0?wN/wX:0,yO=wX>0?wO/wX:0;
   $('hMix').textContent=wX>0?`ダイヤ:Exp = ${n1(wD)} : ${n0(wX)}(1Expあたり ${n4(dpe)} ♦)。平均 ${n2(yN)}円/Exp(旧 ${n2(yO)})`:'購入比率を入力してください';
-  const W=[];
-  if(!(t>s)) W.push('集計日は創設日より後にしてください。');
-  const days=Math.max(1,(t-s)/864e5);
-  $('hDays').textContent=t>s?`${n0(days)}日間`:'';
-  const cur=R[L-1];
-  $('hLv').textContent=cur&&cur[0]!=null?`Lv${L} の必要Exp: ${n1(cur[0]/1e6)}M`:`Lv${L} のデータが未入力です`;
-  const raw=mem*kill,gpd=Math.min(raw,cap);
-  $('hNorm').textContent=`1日に連盟全体で ${n0(gpd)} 個の普通ギフト${raw>cap?`(上限 ${n0(cap)} 個で頭打ち)`:''}。1個ごとに ${n0(mem)} 人が受け取り、Expは +3ずつ増えます`;
-  let cum=0,chest=0,det=[],ok=true;
-  for(let k=1;k<=L;k++){
-    const r=R[k-1]||[null,null,null],gain=k<L?r[0]:e;
-    if(gain==null){W.push(`Lv${k} の「次Lv Exp」が未入力のため、累計Expを正しく計算できません。`);ok=false;break}
-    cum+=gain;
-    if(r[1]&&r[2]!=null){const o=gain/r[1],d=o*r[2];chest+=d;det.push([k,gain,o,d])}
-    else{W.push(`Lv${k} のカギpt・ダイヤが未入力のため、このレベルの宝のダイヤは含めていません。`);det.push([k,gain,null,null])}
-  }
-  if(ok&&cur&&cur[0]!=null&&e>cur[0]) W.push(`入力したExpが Lv${L} の必要Expを超えています。レベルを確認してください。`);
-  const norm=days*gpd*3*mem;
-  let rare=cum-norm;
-  if(rare<0){W.push('普通ギフトのExpが累計Expを超えています。連盟規模や撃破数を見直してください。');rare=0}
-  const rareP=rare/mem, gift=rareP*dpe, tot=chest+gift;
-  const dB=Math.min(Math.max((Math.min(t,c)-s)/864e5,0),days),dA=days-dB;
-  const yen=rareP*(yO*dB+yN*dA)/days;
-  const cnt=wX>0?rareP/(wX/sw):0;
-  $('warns').innerHTML=W.map(w=>`<p class="warn">${w}</p>`).join('');
-  $('hero').innerHTML=card('連盟員1人が受け取るダイヤ(1日あたり)',n1(tot/days)+' ♦',`期間合計 ${n0(tot)} ♦`,'a')+card('連盟の課金額(1日あたり)',n0(yen/days)+' 円',`期間合計 ${n0(yen)} 円`,'b');
-  $('dia').innerHTML=card('連盟の宝',n0(chest)+' ♦',`1日あたり ${n1(chest/days)} ♦`)+card('レアギフト',n0(gift)+' ♦',`1日あたり ${n1(gift/days)} ♦`);
-  const pc=tot>0?chest/tot*100:0;
-  $('bar').innerHTML=`<i style="width:${pc}%"></i><i style="width:${100-pc}%"></i>`;
-  $('legend').innerHTML=`<span>連盟の宝 ${n0(pc)}%</span><span>レアギフト ${n0(100-pc)}%</span>`;
-  const tr=(a,b,c2,bold)=>`<tr><${bold?'th':'td'}>${a}</${bold?'th':'td'}><td>${b}</td><${bold?'th':'td'}>${c2}</${bold?'th':'td'}></tr>`;
-  $('flow').innerHTML=
-    tr('連盟全体の累計Exp','連盟の宝のレベルとExpから',n0(cum),1)+
-    tr('　− 普通ギフト分','日数 × '+n0(gpd)+'個/日 × 3Exp × 受取人数',n0(norm))+
-    tr('　= レアギフト分(連盟全体)','',n0(rare),1)+
-    tr('　÷ 連盟規模','受取人数で割り、購入ギフトの額面に戻す',n0(rareP)+' Exp(1人あたり)')+
-    tr('　(購入ギフトの換算)','購入比率での平均 '+n1(sw>0?wX/sw:0)+' Exp/個','約 '+n0(cnt)+' 個')+
-    tr('　→ レアギフトのダイヤ','× '+n4(dpe)+' ♦/Exp',n0(gift)+' ♦',1)+
-    tr('　→ 課金額','改定前 '+n0(dB)+'日('+n2(yO)+'円/Exp) / 改定後 '+n0(dA)+'日('+n2(yN)+'円/Exp)',n0(yen)+' 円',1);
-  let h='<tr><th>Lv</th><th>増えたExp</th><th>開封回数</th><th>ダイヤ(♦)</th></tr>';
-  det.forEach(d=>{h+=`<tr><td>${d[0]}</td><td style="text-align:right;color:inherit;font-size:inherit">${n0(d[1])}</td><td>${d[2]==null?'-':n2(d[2])}</td><td>${d[3]==null?'-':n0(d[3])}</td></tr>`});
-  h+=`<tr><th>合計</th><th>${n0(cum)}</th><th></th><th>${n0(chest)}</th></tr>`;
-  $('detail').innerHTML=h;
+  return{sw,wX,wD,dpe,yN,yO};
 }
-$('add').onclick=()=>{const r=rows();DATA.length=0;r.forEach(x=>DATA.push(x));DATA.push([null,null,null]);buildTable();calc()};
-document.addEventListener('input',calc);
-buildTable();buildTiers();calc();
+/* ある連盟の宝のLv・Expまでの累計Expと、連盟の宝から受け取った累計ダイヤ */
+function prog(R,L,e,W){
+  let cum=0,chest=0;
+  for(let k=1;k<=L;k++){
+    const r=R[k-1]||[null,null,null],g=k<L?r[0]:e;
+    if(g==null){W.add(`連盟の宝Lv${k} の「次Lv Exp」が未入力のため、累計Expを正しく計算できません。`);return null}
+    cum+=g;
+    if(r[1]&&r[2]!=null)chest+=g/r[1]*r[2];
+    else W.add(`連盟の宝Lv${k} のカギpt・ダイヤが未入力のため、このレベルの宝のダイヤは含めていません。`);
+  }
+  return{cum,chest};
+}
+
+/* ---------- 連盟・記録 ---------- */
+const validRec=r=>isDate(r.date)&&Number.isInteger(r.lv)&&r.lv>=1&&r.exp!=null&&r.exp>=0&&r.mem!=null&&r.mem>0;
+const sortRecs=a=>{a.recs.sort((x,y)=>(x.date||'9999').localeCompare(y.date||'9999'))};
+function renState(){
+  const a=cur(),v=$('allyName').value.trim();
+  $('allyRen').disabled=!a||!v||v===a.name;
+}
+function showForm(which,focus=true){
+  const a=cur();
+  $('renForm').hidden=which!=='ren';$('addForm').hidden=which!=='add';
+  $('allyRenBtn').setAttribute('aria-expanded',String(which==='ren'));
+  $('allyAddBtn').setAttribute('aria-expanded',String(which==='add'));
+  if(which==='ren'){$('allyName').value=a?a.name:'';renState();if(focus){$('allyName').focus();$('allyName').select()}}
+  if(which==='add'){$('newName').value='';if(focus)$('newName').focus()}
+}
+function renderAlly(){
+  const sel=$('allySel'),a=cur();
+  sel.innerHTML=S.allies.map(x=>`<option value="${esc(x.id)}">${esc(x.name||'(名称なし)')}</option>`).join('');
+  if(a)sel.value=a.id;
+  $('allyManage').hidden=!a;
+  $('hRen').textContent='';
+  $('noAlly').hidden=!!a;
+  $('addCancel').hidden=!a;
+  showForm(a?null:'add',false);
+  const hasFd=!!(a&&isDate(a.fd));
+  $('foundCard').hidden=!(a&&!hasFd);
+  $('recBody').hidden=!hasFd;
+  if(a&&!hasFd){$('fdIn').value='';$('fmIn').value='';$('fdSet').disabled=true}
+  buildPeriod();buildRec();
+}
+function buildRec(){
+  const a=cur();
+  if(!a||!isDate(a.fd)){$('recTbl').innerHTML='';return}
+  let h='<tr><th>日付</th><th>連盟の宝のLv</th><th>Exp(M)</th><th>アクティブ人数</th><th>撃破数/日(空欄=既定)</th><th>累計Exp(M)</th><th></th></tr>';
+  h+=`<tr class="fd" data-id="${FD}"><td><input type="date" data-f="fd" value="${esc(a.fd)}" aria-label="創設日"></td><td>1</td><td>0</td>`+
+    `<td><input type="number" min="1" step="1" data-f="fm" value="${a.fm??''}" placeholder="任意" aria-label="創設日のアクティブ人数(任意)"></td>`+
+    `<td><input type="number" min="0" step="0.1" data-f="fk" value="${a.fk??''}" aria-label="創設日の撃破数"></td>`+
+    `<td data-cum="${FD}">0</td><td class="tag">創設日</td></tr>`;
+  a.recs.forEach((r,i)=>{
+    const n=i+1;
+    h+=`<tr data-id="${esc(r.id)}">`+
+    `<td><input type="date" data-f="date" value="${esc(r.date)}" aria-label="記録${n}の日付"></td>`+
+    `<td><input type="number" min="1" step="1" data-f="lv" value="${r.lv??''}" aria-label="記録${n}の連盟の宝のLv"></td>`+
+    `<td><input type="number" min="0" step="0.01" data-f="exp" value="${r.exp??''}" aria-label="記録${n}のExp(M)"></td>`+
+    `<td><input type="number" min="1" step="1" data-f="mem" value="${r.mem??''}" aria-label="記録${n}のアクティブ人数"></td>`+
+    `<td><input type="number" min="0" step="0.1" data-f="kill" value="${r.kill??''}" aria-label="記録${n}の撃破数"></td>`+
+    `<td data-cum="${esc(r.id)}">-</td>`+
+    `<td><button type="button" class="rowbtn" data-del="${esc(r.id)}" aria-label="記録${n}を削除">削除</button></td></tr>`;
+  });
+  $('recTbl').innerHTML=h;
+  $('recHint').textContent=a.recs.length?'撃破数を空欄にすると、左の「連盟の活動量」の値を使います。':'創設日のあとの記録を追加してください。連盟の宝のLvとExpは、ゲーム画面の表示のまま入力します。';
+}
+/* 推定期間の選択肢: 創設日と記録の日付 */
+function anchors(a){
+  const out=[],seen=new Set();
+  if(isDate(a.fd)){out.push({d:a.fd,l:`${a.fd}(創設日)`});seen.add(a.fd)}
+  a.recs.filter(r=>isDate(r.date)).forEach(r=>{if(!seen.has(r.date)){seen.add(r.date);out.push({d:r.date,l:`${r.date}(連盟の宝Lv${r.lv??'?'})`})}});
+  return out.sort((x,y)=>x.d.localeCompare(y.d));
+}
+function edgeOf(a,k){const A=anchors(a);return A.length?(k==='pf'?A[0].d:A[A.length-1].d):''}
+function buildPeriod(){
+  const a=cur();
+  for(const k of ['pf','pt']){
+    const sel=$(k+'Sel'),inp=$(k);
+    if(!a){sel.innerHTML='';inp.hidden=true;continue}
+    const A=anchors(a),v=a[k]||edgeOf(a,k);
+    const custom=a[k+'c']||!A.some(x=>x.d===v);
+    sel.innerHTML=A.map(x=>`<option value="${x.d}">${esc(x.l)}</option>`).join('')+'<option value="__custom">日付を指定…</option>';
+    sel.value=custom?'__custom':v;
+    inp.hidden=!custom;
+    inp.value=custom?(a[k]||''):'';
+  }
+}
+function calcRec(g){
+  const a=cur();
+  if(!a||!isDate(a.fd))return;
+  const R=rows(),W=new Set();
+  const K0=Math.max(0,Number($('kill').value)||0),cap=Math.max(0,Number($('cap').value)||0),cut=utc($('cut').value);
+  const fdT=utc(a.fd);
+  const bad=a.recs.filter(r=>!validRec(r)).length;
+  if(bad)W.add(`${bad}件の記録に未入力か不正な値があるため、計算から除外しています。`);
+  let ok=a.recs.filter(validRec).map(r=>({...r,t:utc(r.date)}));
+  const early=ok.filter(r=>r.t<fdT).length;
+  if(early)W.add(`創設日(${a.fd})より前の記録が${early}件あるため、計算から除外しています。`);
+  ok=ok.filter(r=>r.t>=fdT).sort((x,y)=>x.t-y.t);
+  ok.forEach(r=>{
+    r.p=prog(R,r.lv,r.exp*1e6,W);
+    const cu=R[r.lv-1];
+    if(cu&&cu[0]!=null&&r.exp*1e6>cu[0])W.add(`${r.date} の記録: Expが連盟の宝Lv${r.lv} の必要Expを超えています。`);
+  });
+  const recs=[{id:FD,date:a.fd,t:fdT,lv:1,exp:0,mem:a.fm>0?a.fm:null,kill:a.fk,p:{cum:0,chest:0}},...ok];
+  document.querySelectorAll('[data-cum]').forEach(el=>{
+    const m=recs.find(x=>x.id===el.dataset.cum);
+    el.textContent=m&&m.p?n2(m.p.cum/1e6):'-';
+  });
+  const showWarns=()=>{$('rWarns').innerHTML=[...W].map(w=>`<p class="warn">${esc(w)}</p>`).join('')};
+  const empty=msg=>{
+    showWarns();
+    $('rHero').innerHTML=card('連盟員1人が受け取るダイヤ(1日あたり)','-',msg,'a')+card('連盟の総課金額(1日あたり)','-','','b');
+    $('rDia').innerHTML='';$('rBar').innerHTML='';$('rLegend').innerHTML='';$('rTbl').innerHTML='';$('hPeriod').textContent='';
+  };
+  if(recs.length<2){empty('創設日のあとの記録が1件以上あると推定できます');return}
+  const first=recs[0].t,last=recs[recs.length-1].t;
+  const pf=a.pf?utc(a.pf):first,pt=a.pt?utc(a.pt):last;
+  if((a.pf&&pf<first)||(a.pt&&pt>last))W.add(`記録のある期間(${fmtU(first)}〜${fmtU(last)})の外は推定できないため、範囲内だけを対象にしています。`);
+  const from=Math.max(pf,first),to=Math.min(pt,last);
+  if(!(to>from)){
+    W.add('推定する期間が記録のある期間と重なっていません。開始日と終了日を確認してください。');
+    empty('推定する期間を確認してください');return;
+  }
+  const out=[],tot={days:0,exp:0,norm:0,rare:0,chest:0,gift:0,yen:0};
+  for(let i=0;i+1<recs.length;i++){
+    const A=recs[i],B=recs[i+1],days=(B.t-A.t)/864e5;
+    if(days<=0){W.add(`${A.date} に複数の記録があります。日付を変えるか、不要な記録を削除してください。`);continue}
+    if(!A.p||!B.p)continue;
+    const d=B.p.cum-A.p.cum;
+    if(d<0){W.add(`${A.date}〜${B.date}: 後の記録のほうが累計Expが少なくなっています。連盟の宝のLvとExpを確認してください。`);continue}
+    const ms=[A.mem,B.mem].filter(x=>x!=null),m=ms.reduce((s,x)=>s+x,0)/ms.length;
+    const k=(Math.max(0,A.kill??K0)+Math.max(0,B.kill??K0))/2;
+    const gpd=Math.min(m*k,cap),norm=days*gpd*3*m;
+    let rare=d-norm;
+    if(rare<0){W.add(`${A.date}〜${B.date}: 普通ギフトのExpが増加Expを超えています。人数や撃破数を見直してください。`);rare=0}
+    const rareP=rare/m,chestD=B.p.chest-A.p.chest;
+    const os=Math.max(A.t,from),oe=Math.min(B.t,to),span=Math.max(0,oe-os);
+    const ov=span/864e5,f=ov/days;
+    const dB=Math.min(span,Math.max(0,Math.min(oe,cut)-os))/864e5,dA=ov-dB;
+    const yen=rareP*(g.yO*dB+g.yN*dA)/days;
+    const o={A,B,days,ov,m,k,d:d*f,norm:norm*f,rare:rare*f,chest:chestD*f,gift:rareP*g.dpe*f,yen};
+    out.push(o);
+    tot.days+=ov;tot.exp+=o.d;tot.norm+=o.norm;tot.rare+=o.rare;tot.chest+=o.chest;tot.gift+=o.gift;tot.yen+=o.yen;
+  }
+  if(!(tot.days>0)){empty('計算できる区間がありません');return}
+  showWarns();
+  $('hPeriod').textContent=`対象: ${fmtU(from)}〜${fmtU(to)}(${n0((to-from)/864e5)}日間)`+(Math.abs(tot.days-(to-from)/864e5)>1e-9?`。うち計算できたのは ${n0(tot.days)}日分です`:'');
+  const dia=tot.chest+tot.gift,D=tot.days;
+  $('rHero').innerHTML=card('連盟員1人が受け取るダイヤ(1日あたり)',n1(dia/D)+' ♦',`期間合計 ${n0(dia)} ♦`,'a')+card('連盟の総課金額(1日あたり)',n0(tot.yen/D)+' 円',`期間合計 ${n0(tot.yen)} 円`,'b');
+  $('rDia').innerHTML=card('連盟の宝',n0(tot.chest)+' ♦',`1日あたり ${n1(tot.chest/D)} ♦`)+card('レアギフト',n0(tot.gift)+' ♦',`1日あたり ${n1(tot.gift/D)} ♦`);
+  const pc=dia>0?tot.chest/dia*100:0;
+  $('rBar').innerHTML=`<i style="width:${pc}%"></i><i style="width:${100-pc}%"></i>`;
+  $('rLegend').innerHTML=`<span>連盟の宝 ${n0(pc)}%</span><span>レアギフト ${n0(100-pc)}%</span>`;
+  let h='<tr><th>区間</th><th>対象日数</th><th>平均人数</th><th>平均撃破/日</th><th>増加Exp(M)</th><th>普通ギフトExp(M)</th><th>レアExp(M)</th><th>宝♦/人</th><th>レア♦/人</th><th>課金(円)</th></tr>';
+  out.forEach(o=>{h+=`<tr class="${o.ov>0?'':'dim'}"><td>${o.A.date}〜${o.B.date}</td><td>${n0(o.ov)}/${n0(o.days)}日</td><td>${n1(o.m)}</td><td>${n1(o.k)}</td><td>${n2(o.d/1e6)}</td><td>${n2(o.norm/1e6)}</td><td>${n2(o.rare/1e6)}</td><td>${n0(o.chest)}</td><td>${n0(o.gift)}</td><td>${n0(o.yen)}</td></tr>`});
+  h+=`<tr><th>合計</th><th>${n0(D)}日</th><th></th><th></th><th>${n2(tot.exp/1e6)}</th><th>${n2(tot.norm/1e6)}</th><th>${n2(tot.rare/1e6)}</th><th>${n0(tot.chest)}</th><th>${n0(tot.gift)}</th><th>${n0(tot.yen)}</th></tr>`;
+  $('rTbl').innerHTML=h;
+}
+function calc(){calcRec(common())}
+
+/* ---------- 操作 ---------- */
+function arm(btn,fn,armText){
+  if(btn.dataset.armed){clearTimeout(btn._t);delete btn.dataset.armed;btn.textContent=btn.dataset.label;fn();return}
+  btn.dataset.label=btn.textContent;btn.dataset.armed='1';btn.textContent=armText||'もう一度押すと削除';
+  btn._t=setTimeout(()=>{delete btn.dataset.armed;btn.textContent=btn.dataset.label},3000);
+}
+document.addEventListener('input',e=>{
+  const t=e.target,a=cur();
+  if(t.closest&&t.closest('#recTbl')&&a){
+    const tr=t.closest('tr'),f=t.dataset.f;
+    if(tr&&tr.dataset.id===FD){
+      if(f==='fd')a.fd=t.value;else if(f==='fm')a.fm=numOrNull(t.value);else if(f==='fk')a.fk=numOrNull(t.value);
+    }else{
+      const r=tr&&a.recs.find(x=>x.id===tr.dataset.id);
+      if(r&&f)r[f]=f==='date'?t.value:numOrNull(t.value);
+    }
+    if(f==='date'||f==='fd'||f==='lv')buildPeriod();
+  }else if(t.id==='allyName'){$('hRen').textContent='';renState();return}
+  else if(t.id==='fdIn'){$('fdSet').disabled=!isDate(t.value);return}
+  else if(t.id==='fmIn'){return}
+  else if(t.id==='newName'){return}
+  else if(t.id==='pf'&&a)a.pf=t.value;
+  else if(t.id==='pt'&&a)a.pt=t.value;
+  save();calc();
+});
+document.addEventListener('change',e=>{
+  const t=e.target,a=cur();
+  if(t.id==='allySel'){S.cur=t.value;renderAlly();save();calc();return}
+  if((t.id==='pfSel'||t.id==='ptSel')&&a){
+    const k=t.id.slice(0,2);
+    if(t.value==='__custom'){a[k+'c']=true;a[k]=a[k]||edgeOf(a,k)}
+    else{a[k+'c']=false;a[k]=t.value}
+    buildPeriod();save();calc();return;
+  }
+  if(t.dataset&&t.dataset.f==='date'&&t.closest('#recTbl')&&a){
+    const before=a.recs.map(r=>r.id).join();
+    sortRecs(a);
+    if(a.recs.map(r=>r.id).join()!==before)buildRec();
+    save();calc();
+  }
+});
+document.addEventListener('click',e=>{
+  const b=e.target.closest&&e.target.closest('button');
+  if(!b)return;
+  if(b.dataset.del){
+    arm(b,()=>{const a=cur();if(!a)return;a.recs=a.recs.filter(r=>r.id!==b.dataset.del);buildRec();buildPeriod();save();calc()},'本当に?');
+  }
+});
+document.addEventListener('keydown',e=>{
+  if(e.isComposing||e.keyCode===229)return;
+  if(e.key==='Escape'&&(e.target.id==='allyName'||(e.target.id==='newName'&&cur()))){showForm(null);return}
+  if(e.key!=='Enter')return;
+  if(e.target.id==='allyName')$('allyRen').click();
+  else if(e.target.id==='newName')$('allyAdd').click();
+});
+$('allyRenBtn').onclick=()=>showForm($('renForm').hidden?'ren':null);
+$('allyAddBtn').onclick=()=>showForm($('addForm').hidden?'add':null);
+$('renCancel').onclick=()=>showForm(null);
+$('addCancel').onclick=()=>showForm(null);
+$('allyAdd').onclick=()=>{
+  const v=$('newName').value.trim();
+  const a=cleanAlly({id:uid(),name:v||`連盟${S.allies.length+1}`});
+  S.allies.push(a);S.cur=a.id;$('newName').value='';
+  renderAlly();save();calc();
+  $('fdIn').focus();
+};
+$('allyRen').onclick=()=>{
+  const a=cur(),v=$('allyName').value.trim();
+  if(!a||!v)return;
+  a.name=v;
+  const o=$('allySel').selectedOptions[0];if(o)o.textContent=v;
+  showForm(null);$('hRen').textContent='名前を変更しました。';
+  save();
+};
+$('allyDel').onclick=e=>{
+  arm(e.currentTarget,()=>{
+    S.allies=S.allies.filter(a=>a.id!==S.cur);
+    S.cur=S.allies[0]?S.allies[0].id:null;
+    renderAlly();save();calc();
+  });
+};
+$('fdSet').onclick=()=>{
+  const a=cur(),d=$('fdIn').value;
+  if(!a||!isDate(d))return;
+  const m=numOrNull($('fmIn').value);
+  a.fd=d;a.fm=m>0?m:null;a.fk=null;
+  renderAlly();save();calc();
+  $('recAdd').focus();
+};
+$('recAdd').onclick=()=>{
+  const a=cur();if(!a)return;
+  const dated=a.recs.filter(r=>r.date);
+  const l=dated.length?dated[dated.length-1]:null;
+  const r={id:uid(),date:fmtD(new Date()),lv:l?l.lv:null,exp:l?l.exp:null,mem:l?l.mem:(a.fm>0?a.fm:null),kill:l?l.kill:null};
+  a.recs.push(r);sortRecs(a);buildRec();buildPeriod();save();calc();
+  const el=document.querySelector(`#recTbl tr[data-id="${r.id}"] input`);
+  if(el)el.focus();
+};
+$('pAll').onclick=()=>{const a=cur();if(!a)return;a.pf=a.pt='';a.pfc=a.ptc=false;buildPeriod();save();calc()};
+$('add').onclick=()=>{const r=rows();DATA.length=0;r.forEach(x=>DATA.push(x));DATA.push([null,null,null]);buildTable();save();calc()};
+$('bkOut').onclick=()=>{
+  $('bk').value=JSON.stringify({v:2,cur:S.cur,allies:S.allies,cfg:cfgNow()},null,1);
+  $('bk').select();
+  $('hBk').textContent='書き出しました。テキストをコピーして保管してください。';
+};
+$('bkIn').onclick=()=>{
+  try{
+    const o=JSON.parse($('bk').value);
+    if(!o||!Array.isArray(o.allies))throw new Error('format');
+    S.allies=o.allies.map(cleanAlly);
+    S.cur=S.allies.some(a=>a.id===o.cur)?o.cur:(S.allies[0]?S.allies[0].id:null);
+    if(o.cfg&&typeof o.cfg==='object'){applyCfg(o.cfg);buildTable();buildTiers()}
+    renderAlly();save();calc();
+    $('hBk').textContent=`読み込みました(連盟 ${S.allies.length} 件)。`;
+  }catch(err){
+    $('hBk').textContent='読み込めませんでした。書き出したテキストをそのまま貼り付けてください。';
+  }
+};
+
+load();applyCfg(S.cfg);
+buildTable();buildTiers();
+ready=true;
+renderAlly();calc();
 </script>
 </body>
 </html>
