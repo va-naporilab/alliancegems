@@ -27,7 +27,7 @@
       items: [
         { name: '連盟ダイヤ推定ツール', url: 'index.html' },
         { name: 'ナポリ探究所 - ツール集', url: 'https://sites.google.com/view/naporilab/tools' },
-        { name: '強さ計算ツール（複合）', url: 'https://va-naporilab.github.io/alliancegems/' },
+        { name: '強さ計算ツール（複合）', url: 'https://va-naporilab.github.io/herotitangearcalculator/' },
         { name: '装備バフ比較・換算値', url: 'https://va-naporilab.github.io/equipmentbuff-evaluator/' },
         { name: 'X（Twitter）- なぽ', url: 'https://x.com/naporitan1_3531' }
         // 例: { name: '○○ツール', url: 'https://ユーザー名.github.io/リポジトリ名/', newTab: true },
